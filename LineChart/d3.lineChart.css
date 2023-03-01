@@ -1,0 +1,26 @@
+/* Top-level class to avoid conflicts */
+
+.lineChart {
+  font-family: sans-serif;
+}
+
+.lineChart .background {
+  fill: none;
+  pointer-events: all;
+}
+
+.lineChart .line {
+  fill: none;
+}
+
+.lineChart .axis path,
+.lineChart .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.lineChart .axis text {
+  fill: black;
+  font-size: small;  
+}

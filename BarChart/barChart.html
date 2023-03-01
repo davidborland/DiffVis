@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>  
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title> Bar chart </title>
+  <link rel="stylesheet" href="d3.barChart.css">
+  
+  <!-- <script src="d3.v5.js"></script> -->
+  <!-- <script src="d3.v5.min.js"></script> -->
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+  <script src="d3.barChart.js"></script>
+</head>
+  
+<!-- Set up page -->
+<body>    
+<div>
+  <input type="checkbox" id="showBaselineCheckbox">
+  <label for="showBaselineCheckbox">show baseline</label>
+</div>
+<br>
+<div>
+  <label for="differenceMethodSelect">difference method</label>
+  <select id="differenceMethodSelect">
+    <option value="none">none</option>
+    <option value="bars">bars</option>
+    <option value="color">color</option>
+    <option value="combo">combo</option>
+    <option value="heatMap">heat map</option>
+    <option value="sizeMap">size map</option>    
+    <option value="heightMap">height map</option>
+  </select>
+</div>
+<br>
+<div>
+  <label for="comboWidthRange">combo width</label>
+  <input type="range" id="comboWidthRange" min="1">
+</div>
+<br>
+<div id="barChart" style="float:left"></div>
+
+<!-- Bar chart -->
+<script type="text/javascript">
+
+// Create the bar chart function
+var barChart = d3.barChart()
+    .width(800)
+    .height(400);
+  
+// GUI
+d3.select("#showBaselineCheckbox")
+    .on("click", function() {
+      barChart.showBaseline(this.checked);
+    });
+
+d3.select("#differenceMethodSelect")
+    .on("change", function() {  
+      barChart.differenceMethod(this.value);
+    });
+
+d3.select("#comboWidthRange")
+    .attr("value", barChart.comboWidth() * 100)
+    .on("input", function() {
+      barChart.comboWidth(this.value / 100);
+    });
+
+// Load data file
+d3.csv("data/archives_cleaned.csv", loadData);
+
+function loadData(error, data) {
+  // Check for error
+  if (error) {
+    console.log(error);
+    return;
+  }
+  
+  // Process data
+  var i = 0,
+      n = 40;
+  
+  data = data.slice(i, i + n).map(function(d, i) {
+    return {
+      x: i + 1,
+      y: +d["Total Enrollment"]
+    };
+  });
+  
+  // Remove any existing visualization
+  d3.select("#barChart").select("svg").remove();
+  
+  // Create the visualization
+  d3.select("#barChart")
+      .datum(data)
+      .call(barChart);
+}
+ 
+</script>
+</body>
+</html>

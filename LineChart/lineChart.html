@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>  
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title> Line chart </title>
+  <link rel="stylesheet" href="d3.lineChart.css">
+  
+<!-- <script src="d3.v5.js"></script> -->
+<!-- <script src="d3.v5.min.js"></script> -->
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+<!-- <script src="simple_statistics.js"></script> -->
+  <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+  <script src="d3.lineChart.js"></script>
+</head>
+  
+<!-- Set up page -->
+<body> 
+<div>
+  <label for="trendLengthRange">regression length</label>
+  <input type="range" id="trendLengthRange" min="1" max="100">
+</div>
+<br>
+<div>
+  <label for="zeroIntensityRange">zero intensity</label>
+  <input type="range" id="zeroIntensityRange" min="50" max="100">
+</div>
+<br>  
+<div>
+  <input type="checkbox" id="showAreaCheckbox">
+  <label for="showAreaCheckbox">show area</label>
+  <input type="checkbox" id="showTrendCheckbox">
+  <label for="showTrendCheckbox">show trend</label>
+  <input type="checkbox" id="clipAreaCheckbox">
+  <label for="clipAreaCheckbox">clip area</label>
+</div>
+<br>
+<div id="lineChart" style="float:left"></div>
+
+<!-- Line chart -->
+<script type="text/javascript">
+
+// Create the bar chart function
+var lineChart = d3.lineChart()
+    .width(800)
+    .height(400);
+  
+var dataLength;
+  
+d3.select("#trendLengthRange")
+    .on("input", function() {
+      lineChart.trendLength(sliderToValue(this.value));
+    });
+  
+d3.select("#zeroIntensityRange")
+    .attr("value", lineChart.zeroIntensity() * 100)
+    .on("input", function() {
+      lineChart.zeroIntensity(this.value / 100);
+    });
+  
+d3.select("#showAreaCheckbox")
+    .property("checked", lineChart.showArea())
+    .on("click", function() {
+      lineChart.showArea(this.checked);
+      clipAreaActive();
+    });
+
+d3.select("#showTrendCheckbox")
+    .property("checked", lineChart.showTrend())
+    .on("click", function() {
+      lineChart.showTrend(this.checked);
+      clipAreaActive();
+    });
+    
+d3.select("#clipAreaCheckbox")
+    .property("checked", lineChart.showTrend())
+    .on("click", function() {
+      lineChart.clipArea(this.checked);
+    });
+    
+function clipAreaActive() {
+  var area = d3.select("#showAreaCheckbox").property("checked"),
+      trend = d3.select("#showTrendCheckbox").property("checked");
+  
+  d3.select("#clipAreaCheckbox").property("disabled", !area || !trend);
+}
+
+clipAreaActive();
+    
+// Load data file
+var fileName = "data/aapl.tsv";
+//var fileName = "data/temperature.tsv";
+//var fileName = "data/data.csv";
+
+if (fileName.indexOf(".tsv") !== -1) d3.tsv(fileName, loadData);
+else if (fileName.indexOf(".csv") !== -1) d3.csv(fileName, loadData);
+
+function loadData(error, data) {
+  // Check for error
+  if (error) {
+    console.log(error);
+    return;
+  }
+  
+  dataLength = data.length;
+  
+  var dateFormat;
+  if (fileName.indexOf("aapl") !== -1) dateFormat = d3.time.format("%d-%b-%y");
+  else if (fileName.indexOf("temperature") !== -1) dateFormat = d3.time.format("%Y%m%d");
+  else if (fileName.indexOf("data") !== -1) dateFormat = d3.time.format("%d-%b-%y");
+  
+  var lines = d3.keys(data[0]).filter(function(d) { return d !== "date"; }),
+      lineData = lines.map(function(line) { 
+        return {
+          name: line,
+          data: data.map(function(d) {
+            return { 
+              date: dateFormat.parse(d.date),
+              value: +d[line]
+            };
+          })
+        };
+      });
+      
+//lineData = [lineData[1]];
+  
+  // Remove any existing visualization
+  d3.select("#lineChart").select("svg").remove();
+  
+  // Create the visualization
+  d3.select("#lineChart")
+      .datum(lineData)
+      .call(lineChart);
+    
+  // Set regression length values
+  d3.select("#trendLengthRange")
+      .attr("value", valueToSlider(lineChart.trendLength()));
+}
+
+var exponent = 4;
+
+function sliderToValue(d) {
+  var v = d / 100;
+  v = Math.pow(v, exponent);
+  
+  return Math.floor(2 + v * (dataLength * 2 - 2));
+}
+
+function valueToSlider(d) {
+  var v = (d - 2) / (dataLength * 2 - 2);
+  v = Math.pow(v, 1 / exponent);
+  
+  return Math.floor(v * 100);
+}
+ 
+</script>
+</body>
+</html>

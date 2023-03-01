@@ -1,0 +1,42 @@
+/* Top-level class to avoid conflicts */
+
+.barChart {
+  font-family: sans-serif;
+}
+
+.barChart .background {
+  fill: none;
+  pointer-events: all;
+}
+
+.barChart .value {
+  fill: silver;
+}
+
+.barChart .value.highlight {
+  stroke: dimgrey;
+  stroke-width: 2;
+}
+
+.barChart .value.select {
+  fill: #999999;
+}
+
+.barChart .baseline {
+  fill: none;
+  stroke: dimgrey;
+  stroke-dasharray: 5, 5;
+  shape-rendering: crispEdges;
+}
+
+.barChart .axis path,
+.barChart .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.barChart .axis text {
+  fill: black;
+  font-size: small;  
+}
